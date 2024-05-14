@@ -16,9 +16,15 @@ export const schema = yup.object().shape({
     .string()
     .oneOf(["male", "female", "other"], "Invalid gender")
     .required("Gender is required"),
-  state: yup.string().required("Select a state"),
-  country: yup.string().required("Select a country"),
-  city: yup.string().required("Select a city"),
+  country: yup.string(),
+  state: yup.string().when("country", {
+    is: (val: string | undefined) => !!val, // Check if country is not empty
+    then: (schema) => schema.required("Select a state"),
+  }),
+  city: yup.string().when("state", {
+    is: (val: string | undefined) => !!val, // Check if state is not empty
+    then: (schema) => schema.required("Select a city"),
+  }),
 });
 
 // ===== Custum Validations ===== //

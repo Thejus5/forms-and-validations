@@ -12,14 +12,21 @@ export default function Form() {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [allCitiesData, setAllCitiesData] = useState([]);
   const [countries, setCountries] = useState<any>([]);
+  const [states, setStates] = useState<any>([]);
+  const [cities, setCities] = useState<any>([]);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm({
     resolver: yupResolver(schema),
   });
+
+  // form watchers
+  const selectedCountry = watch("country");
+  const selectedState = watch("state");
 
   useEffect(() => {
     fetchData(
@@ -28,13 +35,31 @@ export default function Form() {
       .then((response) => {
         setIsButtonDisabled(false);
         setAllCitiesData(response);
-        setCountries([...new Set(response.map((item: any) => item.country))]);
+        setCountries([...new Set(response.map((item: any) => item.country))].sort());
       })
       .catch((err: any) => {
         setIsButtonDisabled(false);
         console.log(err);
       });
   }, []);
+
+  useEffect(() => {
+    if (selectedCountry) {
+      const allStates = allCitiesData.filter(
+        (state: any) => state.country === selectedCountry
+      );
+      setStates([...new Set(allStates.map((item: any) => item.subcountry))].sort());
+    }
+  }, [selectedCountry]);
+
+  useEffect(() => {
+    if (selectedState) {
+      const allCities = allCitiesData.filter(
+        (city: any) => city.subcountry === selectedState
+      );
+      setCities([...new Set(allCities.map((item: any) => item.name))].sort());
+    }
+  }, [selectedState]);
 
   const onSubmit = (data: any) => {
     console.log(data);
@@ -84,6 +109,7 @@ export default function Form() {
 
       {/* Address ================ */}
       <div className="addressSection">
+        {/* Country */}
         <div className="form-sub-section inputWidth">
           <label htmlFor="country">Country</label>
           <SelectComponent id="country" {...register("country")}>
@@ -97,16 +123,40 @@ export default function Form() {
           </SelectComponent>
           {errors.country && <span>{errors.country.message}</span>}
         </div>
-        <div className="form-sub-section inputWidth">
-          <label htmlFor="state">State</label>
-          <InputComponent id="state" type="text" {...register("state")} />
-          {errors.state && <span>{errors.state.message}</span>}
-        </div>
-        <div className="form-sub-section inputWidth">
-          <label htmlFor="city">City</label>
-          <InputComponent id="city" type="text" {...register("city")} />
-          {errors.city && <span>{errors.city.message}</span>}
-        </div>
+
+        {/* State */}
+        {selectedCountry && (
+          <div className="form-sub-section inputWidth">
+            <label htmlFor="state">State</label>
+            <SelectComponent id="state" {...register("state")}>
+              <option value="">Select State</option>
+              {states.length !== 0 &&
+                states.map((state: string) => (
+                  <option key={state} value={state}>
+                    {state}
+                  </option>
+                ))}
+            </SelectComponent>
+            {errors.state && <span>{errors.state.message}</span>}
+          </div>
+        )}
+
+        {/* City */}
+        {selectedState && (
+          <div className="form-sub-section inputWidth">
+            <label htmlFor="city">City</label>
+            <SelectComponent id="city" {...register("city")}>
+              <option value="">Select City</option>
+              {cities.length !== 0 &&
+                cities.map((city: string) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+            </SelectComponent>
+            {errors.city && <span>{errors.city.message}</span>}
+          </div>
+        )}
       </div>
 
       <Button variant="contained" type="submit" disabled={isButtonDisabled}>
