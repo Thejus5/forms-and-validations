@@ -5,8 +5,14 @@ import { InputComponent } from "../Input/input.styles";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { schema } from "./form.schema";
 import { SelectComponent } from "../Select/select.styles";
+import { useEffect, useState } from "react";
+import { fetchData } from "../../api/api";
 
 export default function Form() {
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [allCitiesData, setAllCitiesData] = useState([]);
+  const [countries, setCountries] = useState<any>([]);
+
   const {
     register,
     handleSubmit,
@@ -15,9 +21,25 @@ export default function Form() {
     resolver: yupResolver(schema),
   });
 
+  useEffect(() => {
+    fetchData(
+      "https://pkgstore.datahub.io/core/world-cities/world-cities_json/data/5b3dd46ad10990bca47b04b4739a02ba/world-cities_json.json"
+    )
+      .then((response) => {
+        setIsButtonDisabled(false);
+        setAllCitiesData(response);
+        setCountries([...new Set(response.map((item: any) => item.country))]);
+      })
+      .catch((err: any) => {
+        setIsButtonDisabled(false);
+        console.log(err);
+      });
+  }, []);
+
   const onSubmit = (data: any) => {
     console.log(data);
   };
+
   return (
     <FormWrapper onSubmit={handleSubmit(onSubmit)}>
       {/* First Name ================ */}
@@ -64,22 +86,30 @@ export default function Form() {
       <div className="addressSection">
         <div className="form-sub-section inputWidth">
           <label htmlFor="country">Country</label>
-          <InputComponent id="country" type="text" {...register("country")}/>
+          <SelectComponent id="country" {...register("country")}>
+            <option value="">Select Country</option>
+            {countries.length !== 0 &&
+              countries.map((country: string) => (
+                <option key={country} value={country}>
+                  {country}
+                </option>
+              ))}
+          </SelectComponent>
           {errors.country && <span>{errors.country.message}</span>}
         </div>
         <div className="form-sub-section inputWidth">
           <label htmlFor="state">State</label>
-          <InputComponent id="state" type="text" {...register("state")}/>
+          <InputComponent id="state" type="text" {...register("state")} />
           {errors.state && <span>{errors.state.message}</span>}
         </div>
         <div className="form-sub-section inputWidth">
           <label htmlFor="city">City</label>
-          <InputComponent id="city" type="text" {...register("city")}/>
+          <InputComponent id="city" type="text" {...register("city")} />
           {errors.city && <span>{errors.city.message}</span>}
         </div>
       </div>
 
-      <Button variant="contained" type="submit">
+      <Button variant="contained" type="submit" disabled={isButtonDisabled}>
         Submit
       </Button>
     </FormWrapper>
