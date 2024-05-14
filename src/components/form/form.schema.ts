@@ -1,4 +1,5 @@
 import * as yup from "yup";
+import { fetchData } from "../../api/api";
 
 export const schema = yup.object().shape({
   firstName: yup.string().required("First name is required"),
@@ -6,7 +7,32 @@ export const schema = yup.object().shape({
   email: yup
     .string()
     .email("Not a valid email address")
-    .required("Email is required"),
+    .required("Email is required")
+    .test("API validation", "Couldn't very the email", (value: any) => {
+      if (value) {
+        let timeoutId: any;
+        return new Promise(async (resolve, reject) => {
+          console.log(timeoutId);
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(async () => {
+            try {
+              const response = await fetchData(
+                `https://emailvalidation.abstractapi.com/v1/?api_key=009b67cb04944ed2a431c90baf654a77&email=${value}`
+              );
+              console.log(response);
+              resolve(true);
+            } catch (error) {
+              console.log(error);
+              reject(error);
+            }
+          }, 1000);
+          console.log(timeoutId)
+        });
+      } else {
+        return false;
+      }
+    }),
+
   age: yup
     .number()
     .positive("Not a valid age")
@@ -41,3 +67,6 @@ export const schema = yup.object().shape({
 function isOldEnough(value: any) {
   return value >= 21;
 }
+
+
+//https://app.abstractapi.com/api/email-validation/tester
