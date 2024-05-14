@@ -34,5 +34,10 @@ export const FormWrapper = styled.form`
         bottom: 5px;
       }
     }
+
+    .disabledInput{
+      opacity: 0.5;
+      pointer-events: none;
+    }
   }
 `;

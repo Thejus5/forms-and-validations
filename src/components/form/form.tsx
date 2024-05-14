@@ -35,7 +35,9 @@ export default function Form() {
       .then((response) => {
         setIsButtonDisabled(false);
         setAllCitiesData(response);
-        setCountries([...new Set(response.map((item: any) => item.country))].sort());
+        setCountries(
+          [...new Set(response.map((item: any) => item.country))].sort()
+        );
       })
       .catch((err: any) => {
         setIsButtonDisabled(false);
@@ -48,7 +50,9 @@ export default function Form() {
       const allStates = allCitiesData.filter(
         (state: any) => state.country === selectedCountry
       );
-      setStates([...new Set(allStates.map((item: any) => item.subcountry))].sort());
+      setStates(
+        [...new Set(allStates.map((item: any) => item.subcountry))].sort()
+      );
     }
   }, [selectedCountry]);
 
@@ -125,38 +129,42 @@ export default function Form() {
         </div>
 
         {/* State */}
-        {selectedCountry && (
-          <div className="form-sub-section inputWidth">
-            <label htmlFor="state">State</label>
-            <SelectComponent id="state" {...register("state")}>
-              <option value="">Select State</option>
-              {states.length !== 0 &&
-                states.map((state: string) => (
-                  <option key={state} value={state}>
-                    {state}
-                  </option>
-                ))}
-            </SelectComponent>
-            {errors.state && <span>{errors.state.message}</span>}
-          </div>
-        )}
+        <div
+          className={`form-sub-section inputWidth ${
+            !selectedCountry && "disabledInput"
+          }`}
+        >
+          <label htmlFor="state">State</label>
+          <SelectComponent id="state" {...register("state")}>
+            <option value="">Select State</option>
+            {states.length !== 0 &&
+              states.map((state: string) => (
+                <option key={state} value={state}>
+                  {state}
+                </option>
+              ))}
+          </SelectComponent>
+          {errors.state && <span>{errors.state.message}</span>}
+        </div>
 
         {/* City */}
-        {selectedState && (
-          <div className="form-sub-section inputWidth">
-            <label htmlFor="city">City</label>
-            <SelectComponent id="city" {...register("city")}>
-              <option value="">Select City</option>
-              {cities.length !== 0 &&
-                cities.map((city: string) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-            </SelectComponent>
-            {errors.city && <span>{errors.city.message}</span>}
-          </div>
-        )}
+        <div
+          className={`form-sub-section inputWidth ${
+            !selectedState && "disabledInput"
+          }`}
+        >
+          <label htmlFor="city">City</label>
+          <SelectComponent id="city" {...register("city")}>
+            <option value="">Select City</option>
+            {cities.length !== 0 &&
+              cities.map((city: string) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+          </SelectComponent>
+          {errors.city && <span>{errors.city.message}</span>}
+        </div>
       </div>
 
       <Button variant="contained" type="submit" disabled={isButtonDisabled}>
